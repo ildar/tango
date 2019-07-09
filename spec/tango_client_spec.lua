@@ -52,41 +52,49 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
       server:kill()
     end)
 
-  it("adds",
+  it("can run `add` remotely",
      function()
-       return client.add(1,2)==3
+       assert.is_equal( 3, client.add(1,2) )
      end)
 
-  it("runs 'echo' remotely",
+  it("can run `echo` remotely",
      function()
        local tab = {number=444,name='horst',bool=true}
        local tab2 = client.echo(tab)
-       return tab.number==tab2.number and tab.name==tab2.name and tab.bool==tab2.bool
+       assert.is_equal( tab.number, tab2.number )
+       assert.is_equal( tab.name, tab2.name )
+       assert.is_equal( tab.bool, tab2.bool )
      end)
 
   it("can return multiple values",
      function()
        local a,b,c = 1.234,true,{el=11}
        local a2,b2,c2 = client.echo(a,b,c)
-       return a==a2 and b==b2 and c.el==c2.el
+       assert.is_equal( a, a2 )
+       assert.is_equal( b, b2 )
+       assert.is_equal( c.el, c2.el )
      end)
 
   it("can do string error",
      function()
        local status,msg = pcall(function()client.strerror()end)
-       return status==false and type(msg) == 'string' and msg:find('testmessage') 
+       assert.is_equal( false, status )
+       assert.is_equal( 'string', type(msg) )
+       assert.is.truthy( msg:find('testmessage') )
      end)
 
-  it("can custom error",
+  it("can do custom error",
      function()
        local errtab = {code=117}
        local status,errtab2 = pcall(function()client.customerror(errtab)end)
-       return status==false and type(errtab2) == 'table' and errtab2.code==errtab.code
+       assert.is_equal( false, status )
+       assert.is_equal( 'table', type(errtab2) )
+       assert.is_equal( errtab2.code, errtab.code )
      end)
 
   it("can nested method name",
      function()
-       return client.nested.method.name()==true
+       assert.is_equal( true, client.nested.method.name() )
      end)
 
   it("can tango.ref with io.popen",
@@ -95,7 +103,7 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
        local match = pref:read('*a'):find('hello')
        pref:close()
        tango.unref(pref)
-       return match
+       assert.is.truthy( match )
      end)
 
   it("can tango.ref with person",
@@ -104,13 +112,14 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
        pref:name('peter')
        local match = pref:name() == 'peter'
        tango.unref(pref)
-       return match
+       assert.is.truthy( match )
      end)
 
   it("should create and access variables with number",
      function()
        client.x(4)
-       return client.x() == 4 and client.double_x() == 8
+       assert.is_equal( 4, client.x() )
+       assert.is_equal( 8, client.double_x() )
      end)
 
   it("should create and access variables with tables",
@@ -118,7 +127,9 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
        client.abc({sub='horst',tab={}})
        client.abc.tab.num(1234)
        local abc = client.abc()
-       return type(abc) == 'table' and abc.sub == 'horst' and abc.tab.num == 1234
+       assert.is_equal( 'table', type(abc) )
+       assert.is_equal( 'horst', abc.sub )
+       assert.is_equal( 1234, abc.tab.num )
      end)
 
   it("should accessing not existing tables to cause error",
@@ -127,7 +138,8 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
          function()
            client.horst.dieter()
          end)
-       return ok == false and err:find('horst.dieter')
+       assert.is_equal( false, ok )
+       assert.is.truthy( err:find('horst.dieter') )
      end)
 end)
 
@@ -142,7 +154,8 @@ describe("Tests the client side of Tango moodule (ro cases)", function()
   it("can read remote variable",
      function()         
        local d = client.data()
-       return d.x == 0 and d.y == 3
+       assert.is_equal( 0, d.x )
+       assert.is_equal( 3, d.y )
      end)
 
   it("writing remote variable should cause a error",
@@ -151,7 +164,7 @@ describe("Tests the client side of Tango moodule (ro cases)", function()
          function()
            client.data(33)
          end)
-       return ok == false
+       assert.is_equal( false, ok )
      end)
 end)
 
@@ -169,7 +182,7 @@ describe("Tests the client side of Tango moodule (wo cases)", function()
          function()
            client.data()
          end)
-       return ok == false
+       assert.is_equal( false, ok )
      end)
 
   it("should successfully write remote variable",
@@ -178,6 +191,6 @@ describe("Tests the client side of Tango moodule (wo cases)", function()
          function()
            client.data(33)
          end)
-       return ok == true
+       assert.is_equal( true, ok )
      end)
 end)
