@@ -22,7 +22,7 @@ loop =
 
 onreceive =
   function(conn, chunk)
-    -- surprise me 
+    dispatcher:dispatch("0123456789")
   end
   
 return {
