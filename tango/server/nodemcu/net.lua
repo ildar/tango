@@ -1,26 +1,19 @@
+-- This is intended to be run on a NodeMCU in a very constrained environment
+--   one instance per system
+
 -- require "net" -- which is the NodeMCU core `net` module
 
 local print = print
 local tonumber = tonumber
 local dispatcher = require "tango.dispatcher"
-local default = require "tango.config".server_default
+local default_cfg = require "tango.config".server_default
 
 module('tango.server.nodemcu.net')
 
-new = 
-  function(config)
-    config = default(config)
-    config.port = config.port or 12345
-    
-    -- TODO
-  end
+--   one instance per system
+local tango_conf
 
-loop = 
-  function(config)
-    local server = new(config)
-    -- TODO
-  end
-
+--   one instance per system
 local buf -- accumulating received bytes
 local msg_len=0 -- if 0 then we're in header phase, otherwise in msg phase
 onreceive =
@@ -31,7 +24,6 @@ onreceive =
       buf = buf .. chunk
     end
     
-    -- consume buffer line by line
     while #buf > 0 do
       if msg_len == 0 then -- in header
         local e = buf:find("\n", 1, true)
@@ -47,16 +39,36 @@ onreceive =
         local msg = buf:sub(1, msg_len)
         buf = buf:sub(msg_len+1)
         msg_len = 0
-        dispatcher:dispatch(msg)
+        -- process the incoming message and send the response
+        local message = tango_conf.unserialize(msg)
+        local response = dispatcher:dispatch(message)
+        local rsp = tango_conf.serialize(response)
+        conn:send(rsp)
         -- msg = nil
       end
+      -- TODO: maybe postpone the watchdog?
       -- TODO: collect some garbage?
     end
   end
   
+new = 
+  function(config)
+    tango_conf = default_cfg(config)
+    tango_conf.port = (config and config.port) or 12345
+    -- TODO create server here
+  end
+
+local srv
+loop = 
+  function(config)
+    -- TODO
+    local server = new(config)
+  end
+
 return {
   loop = loop,
   onreceive = onreceive,
-  new = new
+  new = new,
+  -- tango_conf = tango_conf
 }
 
