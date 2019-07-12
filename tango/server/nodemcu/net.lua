@@ -5,7 +5,9 @@
 
 local print = print
 local tonumber = tonumber
-local dispatcher = require "tango.dispatcher"
+local tostring = tostring
+local net = net
+local dispatcher_mod = require "tango.dispatcher"
 local default_cfg = require "tango.config".server_default
 
 module('tango.server.nodemcu.net')
@@ -18,6 +20,7 @@ local buf -- accumulating received bytes
 local msg_len=0 -- if 0 then we're in header phase, otherwise in msg phase
 onreceive =
   function(conn, chunk)
+    local dispatcher = tango_conf.dispatcher
     if not buf then
       buf = chunk
     else
@@ -43,6 +46,7 @@ onreceive =
         local message = tango_conf.unserialize(msg)
         local response = dispatcher:dispatch(message)
         local rsp = tango_conf.serialize(response)
+        rsp = tostring(#rsp) .. "\n" .. rsp
         conn:send(rsp)
         -- msg = nil
       end
@@ -51,22 +55,28 @@ onreceive =
     end
   end
   
+  onnewclient =
+    function(conn)
+      conn:on("receive", onreceive)
+      conn:on("disconnection", ondisconnect)     
+    end
+  
+--   one instance per system
+local srv
 new = 
   function(config)
     tango_conf = default_cfg(config)
     tango_conf.port = (config and config.port) or 12345
-    -- TODO create server here
-  end
-
-local srv
-loop = 
-  function(config)
-    -- TODO
-    local server = new(config)
+    tango_conf.dispatcher = dispatcher_mod.new(tango_conf)        
+    
+    -- NB: only one server at a time
+    if srv then srv:close() end
+    srv = net.createServer(net.TCP, 15)
+    srv:listen(tango_conf.port, onnewclient)
   end
 
 return {
-  loop = loop,
+  loop = new, -- NodeMCU has its own loop
   onreceive = onreceive,
   new = new,
   -- tango_conf = tango_conf
