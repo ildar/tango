@@ -2,11 +2,11 @@
 --   one instance per system
 
 -- require "net" -- which is the NodeMCU core `net` module
+local net = net
 
 local print = print
 local tonumber = tonumber
 local tostring = tostring
-local net = net
 local dispatcher_mod = require "tango.dispatcher"
 local default_cfg = require "tango.config".server_default
 
@@ -18,9 +18,10 @@ local tango_conf
 --   one instance per system
 local buf -- accumulating received bytes
 local msg_len=0 -- if 0 then we're in header phase, otherwise in msg phase
-onreceive =
+check_input_data =
   function(conn, chunk)
     local dispatcher = tango_conf.dispatcher
+    if not chunk or #chunk < 1 then return end
     if not buf then
       buf = chunk
     else
@@ -49,6 +50,7 @@ onreceive =
         rsp = tostring(#rsp) .. "\n" .. rsp
         conn:send(rsp)
         -- msg = nil
+        return -- one send per iteration allowed
       end
       -- TODO: maybe postpone the watchdog?
       -- TODO: collect some garbage?
@@ -57,7 +59,8 @@ onreceive =
   
   onnewclient =
     function(conn)
-      conn:on("receive", onreceive)
+      conn:on("receive", check_input_data)
+      conn:on("sent", check_input_data)
       conn:on("disconnection", ondisconnect)     
     end
   
@@ -79,8 +82,8 @@ new =
   end
 
 return {
+  check_input_data = check_input_data,
   loop = new, -- NodeMCU has its own loop
-  onreceive = onreceive,
   new = new,
   -- tango_conf = tango_conf
 }
