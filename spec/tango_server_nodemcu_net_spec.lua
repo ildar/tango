@@ -5,6 +5,7 @@ local dispatcher = require "tango.dispatcher"
 
 local fakeconn = {send=function() end}
 describe("tango.server.nodemcu.net module", function ()
+  describe("check_input_data()", function ()
     setup( function()
           local tango_conf = tsnn_module.new({
               serialize = function(...) return serialization.serialize(...) or "" end,
@@ -13,7 +14,7 @@ describe("tango.server.nodemcu.net module", function ()
           stub(tango_conf.dispatcher, "dispatch")
           stub(serialization, "serialize")
         end)
-    it("should be able to receive some trivial data", function ()
+    it("should be able to process some trivial input data", function ()
         local testchunk = "10\n0123456789"
         stub(serialization, "unserialize")
         
@@ -21,7 +22,7 @@ describe("tango.server.nodemcu.net module", function ()
         assert.stub(serialization.unserialize).was.called_with("0123456789")
         serialization.unserialize:revert()
       end)
-    it("should be able to receive chucked data", function ()
+    it("should be able to process chucked input data", function ()
         local testchunk1, testchunk2 = "10\n012", "3456789"
         stub(serialization, "unserialize")
         
@@ -43,5 +44,5 @@ describe("tango.server.nodemcu.net module", function ()
     it("should be tested on random data", function ()
         pending("add random data tests like of libdbus")
       end)
-    
+  end)
 end)
