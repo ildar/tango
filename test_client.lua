@@ -77,7 +77,7 @@ test('echo test',
 
 test('multiple return values',
      function()
-       local a,b,c = 1.234,true,{el=11}
+       local a,b,c = 1234,true,{el=11}
        local a2,b2,c2 = client.echo(a,b,c)
        return a==a2 and b==b2 and c.el==c2.el
      end)

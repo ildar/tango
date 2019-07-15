@@ -72,7 +72,7 @@ describe("#BasicTests for the client side of Tango moodule (rw cases)", function
 
   it("can return multiple values",
      function()
-       local a,b,c = 1.234,true,{el=11}
+       local a,b,c = 1234,true,{el=11}
        local a2,b2,c2 = client.echo(a,b,c)
        assert.is_equal( a, a2 )
        assert.is_equal( b, b2 )
