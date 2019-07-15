@@ -14,7 +14,7 @@ Its main features are:
 * several server implementations for different protocols, message formats and event/io
 frameworks, further called backends
 * several client implementations for different protocols and message formats
-
+* support NodeMCU-run server, see [README-NodeMCU.md](https://github.com/ildar/tango/blob/master/README-NodeMCU.md) for details
 
 Backends included
 ---------------------
@@ -22,6 +22,7 @@ Backends included
 * copas  
 * [lua-zmq](https://github.com/Neopallium/lua-zmq)
 * [lua-ev](https://github.com/brimworks/lua-ev)
+* [NodeMCU server](https://nodemcu.readthedocs.io/)
 
 Tutorial (copas_socket server +  socket client)
 ============================
