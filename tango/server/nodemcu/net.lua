@@ -64,15 +64,18 @@ onreceive =
 --   one instance per system
 local srv
 new = 
-  function(config)
+  function(config, dont_start_server)
     tango_conf = default_cfg(config)
     tango_conf.port = (config and config.port) or 12345
     tango_conf.dispatcher = dispatcher_mod.new(tango_conf)        
     
-    -- NB: only one server at a time
-    if srv then srv:close() end
-    srv = net.createServer(net.TCP, 15)
-    srv:listen(tango_conf.port, onnewclient)
+    if not dont_start_server then
+      -- NB: only one server at a time
+      if srv then srv:close() end
+      srv = net.createServer(net.TCP, 15)
+      srv:listen(tango_conf.port, onnewclient)
+    end
+    return tango_conf
   end
 
 return {

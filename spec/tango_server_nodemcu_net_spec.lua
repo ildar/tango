@@ -6,11 +6,11 @@ local dispatcher = require "tango.dispatcher"
 local fakeconn = {send=function() end}
 describe("tango.server.nodemcu.net module", function ()
     setup( function()
-          tsnn_module.new({
-              serialize = function(...) return serialization.serialize(...) end,
+          local tango_conf = tsnn_module.new({
+              serialize = function(...) return serialization.serialize(...) or "" end,
               unserialize = function(...) return serialization.unserialize(...) end
-            })
-          stub(dispatcher, "dispatch")
+            }, true)
+          stub(tango_conf.dispatcher, "dispatch")
           stub(serialization, "serialize")
         end)
     it("should be able to receive some trivial data", function ()
