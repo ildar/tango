@@ -4,7 +4,7 @@ local client_backend = "socket"
 local option = nil
 
 local tango = require'tango'
-local config = {}
+local config = { address = os.getenv("TANGO_SERVER") }
 if option then
   if option == 'ssl' then
     config.sslparams = require'test_ssl_config'.client
@@ -12,7 +12,7 @@ if option then
 end
 
 local connect = tango.client[client_backend].connect
-
+local server
 local spawn_server = 
   function(backend,access_str)
     local cmd = [[
@@ -43,13 +43,17 @@ if option then
 end
 print('------------------------------')
 
-describe("Tests the client side of Tango moodule (rw cases)", function()
+describe("#BasicTests for the client side of Tango moodule (rw cases)", function()
   setup(function()
-      server = spawn_server(server_backend,'rw')
+      if not config.address then
+        server = spawn_server(server_backend,'rw')
+      end
       client = connect(config)
     end)
   teardown(function()
-      server:kill()
+      if server then
+        server:kill()
+      end
     end)
 
   it("can run `add` remotely",
@@ -97,7 +101,7 @@ describe("Tests the client side of Tango moodule (rw cases)", function()
        assert.is_equal( true, client.nested.method.name() )
      end)
 
-  it("can tango.ref with io.popen",
+  it("can tango.ref with #io.popen",
      function()
        local pref = tango.ref(client.io.popen,'echo hello')
        local match = pref:read('*a'):find('hello')

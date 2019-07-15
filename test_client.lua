@@ -3,7 +3,7 @@ local client_backend = arg[2]
 local option = arg[3]
 
 local tango = require'tango'
-local config = {}
+local config = { address = os.getenv("TANGO_SERVER") }
 if option then
   if option == 'ssl' then
     config.sslparams = require'test_ssl_config'.client
@@ -49,7 +49,9 @@ local test = function(txt,f)
                end
              end
 
-local server = spawn_server(server_backend,'rw')
+if not config.address then
+  local server = spawn_server(server_backend,'rw')
+end
 local client = connect(config)
 
 print('==============================')
@@ -139,7 +141,9 @@ test('accessing not existing tables causes error',
        return ok == false and err:find('horst.dieter')
      end)
 
-server:kill()
+if server then
+  server:kill()
+end
 server = spawn_server(server_backend,'r')
 client = connect(config)
 
