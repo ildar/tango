@@ -28,13 +28,13 @@ local new =
           for part in var_name:gmatch('[%w_]+') do
              last_part = part
              last_var = var
-             if type(var) == 'table' then
+             if type(var) == 'table' or type(var) == 'romtable' then
                 var = var[part]
             else
                return {false,error_msg(var_name,'no such variable')}
             end  
           end        
-          if type(var) == 'function' then
+          if type(var) == 'function' or type(var) == 'lightfunction' then
              return {self.pcall(var,unpack(request,2))}
           else
              local val = request[2]
@@ -67,7 +67,7 @@ local new =
         local result = d:dispatch({create_method,...})
         if result[1] == true then
           local obj = result[2]
-          if type(obj) == 'table' or type(obj) == 'userdata' then
+          if type(obj) == 'table' or type(var) == 'romtable' or type(obj) == 'userdata' then
             local id = tostring(obj)
             d.refs[id] = obj
             return id
