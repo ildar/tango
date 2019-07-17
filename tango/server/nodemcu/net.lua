@@ -7,6 +7,7 @@ local net = net
 local print = print
 local tonumber = tonumber
 local tostring = tostring
+local _TEST = _TEST
 local dispatcher_mod = require "tango.dispatcher"
 local default_cfg = require "tango.config".server_default
 
@@ -81,10 +82,17 @@ new =
     return tango_conf
   end
 
+local _check_input_data
+if _TEST then
+  _check_input_data = check_input_data
+  -- _tango_conf = tango_conf
+end
+
 return {
-  check_input_data = check_input_data,
   loop = new, -- NodeMCU has its own loop
   new = new,
+  -- private
+  _check_input_data = _check_input_data,
   -- tango_conf = tango_conf
 }
 

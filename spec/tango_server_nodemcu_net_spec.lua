@@ -1,3 +1,4 @@
+_G._TEST = true
 local tsnn_module = require "tango.server.nodemcu.net"
 
 local serialization = require'tango.utils.serialization'
@@ -18,7 +19,7 @@ describe("tango.server.nodemcu.net module", function ()
         local testchunk = "10\n0123456789"
         stub(serialization, "unserialize")
         
-        tsnn_module.check_input_data(fakeconn, testchunk)
+        tsnn_module._check_input_data(fakeconn, testchunk)
         assert.stub(serialization.unserialize).was.called_with("0123456789")
         serialization.unserialize:revert()
       end)
@@ -26,18 +27,18 @@ describe("tango.server.nodemcu.net module", function ()
         local testchunk1, testchunk2 = "10\n012", "3456789"
         stub(serialization, "unserialize")
         
-        tsnn_module.check_input_data(fakeconn, testchunk1)
+        tsnn_module._check_input_data(fakeconn, testchunk1)
         assert.stub(serialization.unserialize).was_not.called()
-        tsnn_module.check_input_data(fakeconn, testchunk2)
+        tsnn_module._check_input_data(fakeconn, testchunk2)
         assert.stub(serialization.unserialize).was.called_with("0123456789")
         serialization.unserialize:revert()
         
         testchunk1, testchunk2 = "1", "0\n0123456789"
         stub(serialization, "unserialize")
         
-        tsnn_module.check_input_data(fakeconn, testchunk1)
+        tsnn_module._check_input_data(fakeconn, testchunk1)
         assert.stub(serialization.unserialize).was_not.called()
-        tsnn_module.check_input_data(fakeconn, testchunk2)
+        tsnn_module._check_input_data(fakeconn, testchunk2)
         assert.stub(serialization.unserialize).was.called_with("0123456789")
         serialization.unserialize:revert()
       end)
