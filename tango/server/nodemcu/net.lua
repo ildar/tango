@@ -19,8 +19,7 @@ local tango_conf
 --   one instance per system
 local buf -- accumulating received bytes
 local msg_len=0 -- if 0 then we're in header phase, otherwise in msg phase
-check_input_data =
-  function(conn, chunk)
+local function check_input_data(conn, chunk)
     local dispatcher = tango_conf.dispatcher
     if not chunk or #chunk < 1 then return end
     if not buf then
@@ -56,19 +55,17 @@ check_input_data =
       -- TODO: maybe postpone the watchdog?
       -- TODO: collect some garbage?
     end
-  end
+end
   
-  onnewclient =
-    function(conn)
+local function on_newclient(conn)
       conn:on("receive", check_input_data)
       conn:on("sent", check_input_data)
-      conn:on("disconnection", ondisconnect)     
-    end
+      conn:on("disconnection", nil)     
+end
   
 --   one instance per system
 local srv
-new = 
-  function(config, dont_start_server)
+local function new(config, dont_start_server)
     tango_conf = default_cfg(config)
     tango_conf.port = (config and config.port) or 12345
     tango_conf.dispatcher = dispatcher_mod.new(tango_conf)        
@@ -77,7 +74,7 @@ new =
       -- NB: only one server at a time
       if srv then srv:close() end
       srv = net.createServer(net.TCP, 15)
-      srv:listen(tango_conf.port, onnewclient)
+      srv:listen(tango_conf.port, on_newclient)
     end
     return tango_conf
   end
