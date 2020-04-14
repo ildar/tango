@@ -1,5 +1,5 @@
 #TODO: add more backends
-local server_backend = "copas_socket"
+local server_backend = "lgi_async"
 local client_backend = "socket"
 local option = nil
 
@@ -12,11 +12,11 @@ if option then
 end
 
 local connect = tango.client[client_backend].connect
-local server
+local server, client
 local spawn_server = 
   function(backend,access_str)
     local cmd = [[
-        lua5.1 test_server.lua %s %s %s &
+        lua test_server.lua %s %s %s &
         echo $!            
     ]]
     cmd = cmd:format(backend,access_str,option or '')

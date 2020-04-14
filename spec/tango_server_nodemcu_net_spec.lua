@@ -23,7 +23,7 @@ describe("tango.server.nodemcu.net module", function ()
         assert.stub(serialization.unserialize).was.called_with("0123456789")
         serialization.unserialize:revert()
       end)
-    it("should be able to process chucked input data", function ()
+    it("should be able to process chuncked input data", function ()
         local testchunk1, testchunk2 = "10\n012", "3456789"
         stub(serialization, "unserialize")
         

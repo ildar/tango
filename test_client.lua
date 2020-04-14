@@ -11,7 +11,7 @@ if option then
 end
 
 local connect = tango.client[client_backend].connect
-
+local server
 local spawn_server = 
   function(backend,access_str)
     local cmd = [[
@@ -50,7 +50,7 @@ local test = function(txt,f)
              end
 
 if not config.address then
-  local server = spawn_server(server_backend,'rw')
+  server = spawn_server(server_backend,'rw')
 end
 local client = connect(config)
 
