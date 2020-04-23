@@ -8,8 +8,7 @@ local print = print
 
 module('tango.proxy')
 
-new = 
-  function(send_request,recv_response,method_name)
+function new(send_request,recv_response,method_name)
     return setmetatable(
       {
         method_name = method_name,
@@ -50,8 +49,7 @@ new =
 
 local rproxies = {}
 
-local root = 
-  function(proxy)
+local function root(proxy)
     local method_name = rawget(proxy,'method_name')
     local send_request = rawget(proxy,'send_request')
     local rproxy
@@ -63,8 +61,7 @@ local root =
     return rproxies[send_request],method_name
   end
 
-ref = 
-  function(proxy,...)
+function ref(proxy,...)
     local rproxy,create_method = root(proxy)
     return setmetatable(
       {
@@ -88,8 +85,7 @@ ref =
       })                      
   end
 
-unref = 
-  function(ref)
+function unref(ref)
     local proxy = rawget(ref,'proxy')
     local id = rawget(ref,'id')
     proxy.tango.ref_release(id)
@@ -100,4 +96,3 @@ return {
   ref = ref,
   unref = unref
 }
-

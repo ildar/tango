@@ -43,7 +43,7 @@ if option then
 end
 print('------------------------------')
 
-describe("#BasicTests for the client side of Tango moodule (rw cases)", function()
+describe("#BasicTests for the client side of Tango module (rw cases)", function()
   setup(function()
       if not config.address then
         server = spawn_server(server_backend,'rw')
@@ -147,7 +147,7 @@ describe("#BasicTests for the client side of Tango moodule (rw cases)", function
      end)
 end)
 
-describe("Tests the client side of Tango moodule (ro cases)", function()
+describe("Tests the client side of Tango module (ro cases)", function()
   setup(function()
       server = spawn_server(server_backend,'r')
       client = connect(config)
@@ -172,7 +172,7 @@ describe("Tests the client side of Tango moodule (ro cases)", function()
      end)
 end)
 
-describe("Tests the client side of Tango moodule (wo cases)", function()
+describe("Tests the client side of Tango module (wo cases)", function()
   setup(function()
       server = spawn_server(server_backend,'w')
       client = connect(config)
