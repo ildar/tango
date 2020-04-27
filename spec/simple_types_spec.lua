@@ -106,6 +106,16 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
        assert.is_equal( 1234, abc.tab.num )
      end)
 
+  it("should assign table elements",
+     function()
+       client.abc = {sub='horst',tab={}}
+       client.abc.tab.num  = 1234
+       local abc = client.abc()
+       assert.is_equal( 'table', type(abc) )
+       assert.is_equal( 'horst', abc.sub )
+       assert.is_equal( 1234, abc.tab.num )
+     end)
+
   it("should accessing not existing tables to cause error",
      function()
        local ok,err = pcall(

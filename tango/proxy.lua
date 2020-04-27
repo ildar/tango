@@ -42,6 +42,10 @@ function new(send_request,recv_response,root_object,method_name)
             else
               error(response[2],2)
             end
+          end,
+        __newindex=
+          function(self, elem, val)
+            self[elem](val)
           end
       })
   end

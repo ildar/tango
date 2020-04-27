@@ -124,6 +124,9 @@ local friends = con.friends()
 table.insert(friends,'Horst')
 -- and write back the new value
 client.friends(friends)
+-- actually simple assignment also works:
+client.friends = friends
+-- But for now this is FIXME: doesn't work if `client.friends` touched before
 ```
 
 If you are worried about security concerns, just do not allow
