@@ -1,4 +1,4 @@
-#TODO: add more backends
+-- TODO: add more backends
 local server_backend = "lgi_async"
 local client_backend = "socket"
 local option = nil
