@@ -11,9 +11,9 @@ module('tango.proxy')
 function new(send_request,recv_response,method_name)
     return setmetatable(
       {
-        method_name = method_name,
-        send_request = send_request,
-        recv_response = recv_response
+        __tango_method_name = method_name,
+        __tango_send_request = send_request,
+        __tango_recv_response = recv_response
       },
       {
         __index= 
@@ -50,11 +50,11 @@ function new(send_request,recv_response,method_name)
 local rproxies = {}
 
 local function root(proxy)
-    local method_name = rawget(proxy,'method_name')
-    local send_request = rawget(proxy,'send_request')
+    local method_name = rawget(proxy,'__tango_method_name')
+    local send_request = rawget(proxy,'__tango_send_request')
     local rproxy
     if not rproxies[send_request] then
-      local recv_response = rawget(proxy,'recv_response')
+      local recv_response = rawget(proxy,'__tango_recv_response')
       rproxy = new(send_request,recv_response)
       rproxies[send_request] = rproxy
     end
@@ -65,8 +65,8 @@ function ref(proxy,...)
     local rproxy,create_method = root(proxy)
     return setmetatable(
       {
-        id = rproxy.tango.ref_create(create_method,...),
-        proxy = rproxy
+        __tango_id = rproxy.tango.ref_create(create_method,...),
+        __tango_proxy = rproxy
       },
       {
         __index = 
@@ -77,8 +77,8 @@ function ref(proxy,...)
               {
                 __call =
                   function(_,ref,...)
-                    local proxy = rawget(ref,'proxy')
-                    return proxy.tango.ref_call(rawget(self,'id'),method_name,...)
+                    local proxy = rawget(ref,'__tango_proxy')
+                    return proxy.tango.ref_call(rawget(self,'__tango_id'),method_name,...)
                   end
               })
           end
@@ -86,8 +86,8 @@ function ref(proxy,...)
   end
 
 function unref(ref)
-    local proxy = rawget(ref,'proxy')
-    local id = rawget(ref,'id')
+    local proxy = rawget(ref,'__tango_proxy')
+    local id = rawget(ref,'__tango_id')
     proxy.tango.ref_release(id)
   end
 
