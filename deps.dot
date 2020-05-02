@@ -1,0 +1,40 @@
+digraph {
+	dispatcher
+	config ->
+// utils
+	serialization
+	socket_message
+	subgraph cluster_dangling {
+		style=invis
+		config
+		socket_message
+		serialization
+	}
+
+	subgraph cluster_client {
+		label = "client"
+		tango [ label="tango(init.lua)" ]
+		tango -> proxy
+		socket [fillcolor=Green,style=filled]
+		socket -> config
+		socket -> proxy
+		socket -> socket_message
+	}
+	subgraph cluster_server {
+		label = "server"
+		lgi_async [fillcolor=Green,style=filled]
+		lgi_async -> config
+		lgi_async -> dispatcher
+		copas_socket  [fillcolor=Green,style=filled]
+		copas_socket -> config
+		copas_socket -> dispatcher
+		copas_socket -> socket_message
+	}
+	user -> socket
+	user -> tango
+	user -> lgi_async
+	user -> copas_socket
+
+	edge [style=invis]
+// 
+}
