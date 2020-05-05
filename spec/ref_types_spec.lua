@@ -13,43 +13,30 @@ end
 
 local connect = tango.client[client_backend].connect
 local server, client
-local spawn_server = 
-  function(backend,access_str)
-    local cmd = [[
-        lua test_server.lua %s %s %s &
-        echo $!            
-    ]]
-    cmd = cmd:format(backend,access_str,option or '')
-    local process = io.popen(cmd)
-    local pid = process:read()
-    if backend ~= 'zmq' then
-      os.execute('sleep 1')
-    end
-    return {
-      process = process,
-      pid = pid,
-      kill = function()
-               os.execute('kill '..pid)
-             end
-    }
+local function spawn_server(backend,access_str)
+  local cmd = [[
+      lua test_server.lua %s %s %s &
+      echo $!            
+  ]]
+  cmd = cmd:format(backend,access_str,option or '')
+  local process = io.popen(cmd)
+  local pid = process:read()
+  if backend ~= 'zmq' then
+    os.execute('sleep 1')
   end
-
---[[
-print('==============================')
-print('running tests with:')
-print('server backend:',server_backend)
-print('client backend:',client_backend)
-if option then
-  print('option:',option)
-end
-print('------------------------------')
-]]
-
-describe("Tango module tango.ref ability", function()
-  setup(function()
-      if not config.address then
-        server = spawn_server(server_backend,'rw')
+  return {
+    process = process,
+    pid = pid,
+    kill = function()
+        os.execute('kill '..pid)
       end
+  }
+end
+
+-- Types of Lua passed by reference: tables, functions, userdata and threads
+describe("Remote tables", function()
+  setup(function()
+      server = spawn_server(server_backend,'rw')
       client = connect(config)
     end)
   teardown(function()
@@ -58,7 +45,7 @@ describe("Tango module tango.ref ability", function()
       end
     end)
 
-  it("can deal with table",
+  it("can be created",
     function()
       client.tab1 ( {} )
       local l_tab1 = tango.ref(client.tab1)
@@ -71,7 +58,7 @@ describe("Tango module tango.ref ability", function()
       ]]
     end)
 
-  pending("can accept a remote table as an argument",
+  pending("can be passed as an argument",
      function()
        client.a1 ( {"a","b"} )
        local l_a1 = tango.ref(client.a1)
@@ -80,7 +67,7 @@ describe("Tango module tango.ref ability", function()
        assert.equals("ab", a1_str)
      end)
 
-  pending("can accept two remote tables as arguments",
+  pending("can be passed as double arguments",
      function()
        client.a1 ( {"a","b"} )
        local l_a1 = tango.ref(client.a1)
@@ -91,5 +78,23 @@ describe("Tango module tango.ref ability", function()
        tango.unref(l_a1) ; tango.unref(l_a2)
        assert.equals("cdab", a2_str)
      end)
+
+end)
+
+describe("Remote functions", function()
+  setup(function()
+      server = spawn_server(server_backend,'rw')
+      client = connect(config)
+    end)
+  teardown(function()
+      if server then
+        server:kill()
+      end
+    end)
+
+  it("can be stored and called", function()
+    local rem_print = client.print
+    -- rem_print("Hello, world!")
+  end)
 
 end)

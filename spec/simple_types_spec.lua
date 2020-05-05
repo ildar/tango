@@ -3,7 +3,7 @@ local server_backend = "lgi_async"
 local client_backend = "socket"
 local option = nil
 
-local tango = require'tango'
+local tango = require 'tango'
 local config = { address = os.getenv("TANGO_SERVER") }
 if option then
   if option == 'ssl' then
@@ -13,41 +13,29 @@ end
 
 local connect = tango.client[client_backend].connect
 local server, client
-local spawn_server = 
-  function(backend,access_str)
-    local cmd = [[
-        lua test_server.lua %s %s %s &
-        echo $!            
-    ]]
-    cmd = cmd:format(backend,access_str,option or '')
-    local process = io.popen(cmd)
-    local pid = process:read()
-    if backend ~= 'zmq' then
-      os.execute('sleep 1')
-    end
-    return {
-      process = process,
-      pid = pid,
-      kill = function()
-               os.execute('kill '..pid)
-             end
-    }
+local function spawn_server(backend,access_str)
+  local cmd = [[
+      lua test_server.lua %s %s %s &
+      echo $!            
+  ]]
+  cmd = cmd:format(backend,access_str,option or '')
+  local process = io.popen(cmd)
+  local pid = process:read()
+  if backend ~= 'zmq' then
+    os.execute('sleep 1')
   end
-
-print('==============================')
-print('running tests with:')
-print('server backend:',server_backend)
-print('client backend:',client_backend)
-if option then
-  print('option:',option)
+  return {
+    process = process,
+    pid = pid,
+    kill = function()
+             os.execute('kill '..pid)
+           end
+  }
 end
-print('------------------------------')
 
 describe("#BasicTests for the client side of Tango module (rw cases)", function()
   setup(function()
-      if not config.address then
-        server = spawn_server(server_backend,'rw')
-      end
+      server = spawn_server(server_backend,'rw')
       client = connect(config)
     end)
   teardown(function()
@@ -99,24 +87,6 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
   it("can nested method name",
      function()
        assert.is_equal( true, client.nested.method.name() )
-     end)
-
-  it("can tango.ref with #io.popen",
-     function()
-       local pref = tango.ref(client.io.popen,'echo hello')
-       local match = pref:read('*a'):find('hello')
-       pref:close()
-       tango.unref(pref)
-       assert.is.truthy( match )
-     end)
-
-  it("can tango.ref with person",
-     function()
-       local pref = tango.ref(client.person,'horst')
-       pref:name('peter')
-       local match = pref:name() == 'peter'
-       tango.unref(pref)
-       assert.is.truthy( match )
      end)
 
   it("should create and access variables with number",
