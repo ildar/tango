@@ -67,7 +67,7 @@ local new =
         local result = d:dispatch({create_method,...})
         if result[1] == true then
           local obj = result[2]
-          if type(obj) == 'table' or type(var) == 'romtable' or type(obj) == 'userdata' then
+          if type(obj) == 'table' or type(obj) == 'romtable' or type(obj) == 'userdata' then
             local id = tostring(obj)
             d.refs[id] = obj
             return id
