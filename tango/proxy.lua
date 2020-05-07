@@ -18,19 +18,14 @@ function new(send_request,recv_response,method_name)
       {
         __index= 
           function(self,sub_method_name)
-            -- look up if proxy already exists
-            local proxy = rawget(self,sub_method_name)
-            if not proxy then 
-              local new_method_name
-              if not method_name then
-                new_method_name = sub_method_name
-              else
-                new_method_name = method_name..'.'..sub_method_name
-              end
-              -- create new call proxy
-              proxy = new(send_request,recv_response,new_method_name)
-            end                            
-            return proxy
+            local new_method_name
+            if not method_name then
+              new_method_name = sub_method_name
+            else
+              new_method_name = method_name..'.'..sub_method_name
+            end
+            -- create new call proxy
+            return new(send_request,recv_response,new_method_name)
           end,        
         __call=
           function(self,...)
