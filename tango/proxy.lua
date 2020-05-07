@@ -32,6 +32,11 @@ function new(send_request,recv_response,root_object,method_name)
           function(self,...)
             send_request({root_object or "",method_name,...})
             local response = recv_response()
+            for i=2,#response do
+              if type(response[i]) == 'table' and response[i].__ref_id then
+                response[i] = new(send_request,recv_response,response[i].__ref_id)
+              end
+            end
             if response[1] == true then
               return unpack(response,2)
             else

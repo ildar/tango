@@ -53,9 +53,9 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
      function()
        local tab = {number=444,name='horst',bool=true}
        local tab2 = client.echo(tab)
-       assert.is_equal( tab.number, tab2.number )
-       assert.is_equal( tab.name, tab2.name )
-       assert.is_equal( tab.bool, tab2.bool )
+       assert.is_equal( tab.number, tab2.number() )
+       assert.is_equal( tab.name, tab2.name() )
+       assert.is_equal( tab.bool, tab2.bool() )
      end)
 
   it("can return multiple values",
@@ -64,7 +64,7 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
        local a2,b2,c2 = client.echo(a,b,c)
        assert.is_equal( a, a2 )
        assert.is_equal( b, b2 )
-       assert.is_equal( c.el, c2.el )
+       assert.is_equal( c.el, c2.el() )
      end)
 
   it("can do string error",
@@ -81,7 +81,7 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
        local status,errtab2 = pcall(function()client.customerror(errtab)end)
        assert.is_equal( false, status )
        assert.is_equal( 'table', type(errtab2) )
-       assert.is_equal( errtab2.code, errtab.code )
+       assert.is_equal( errtab.code, errtab2.code() )
      end)
 
   it("can nested method name",

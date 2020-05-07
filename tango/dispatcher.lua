@@ -36,10 +36,28 @@ local new =
               var = var[part]
             else
               return {false,error_msg(var_name,'no such variable')}
-            end  
-          end        
+            end
+          end
+          -- replace ref-tables with real objects
+          for i=3,#request do
+            if type(request[i]) == 'table' and request[i].__ref_id then
+              request[i] = d.refs[request[i].__ref_id]
+            end
+          end
           if type(var) == 'function' or type(var) == 'lightfunction' then
-            return {self.pcall(var,unpack(request,3))}
+            local res = {self.pcall(var,unpack(request,3))}
+            -- replace ref-tables with real objects
+            for i=1,#res do
+              if type(res[i]) == 'table' or
+                type(res[i]) == 'romtable' or
+                type(res[i]) == 'userdata' or
+                type(res[i]) == 'function' or
+                type(res[i]) == 'lightfunction'
+                then
+                res[i] = { __ref_id = d.functab.tango.__mkref(res[i]) }
+              end
+            end
+            return res
           else
             local val = request[3]
             if val then
@@ -67,12 +85,17 @@ local new =
     d.functab.tango = d.functab.tango or {}
     
     function d.functab.tango.__mkref(obj)
-      if type(obj) == 'table' or type(obj) == 'romtable' or type(obj) == 'userdata' then
+      if type(obj) == 'table' or
+        type(obj) == 'romtable' or
+        type(obj) == 'userdata' or
+        type(obj) == 'function' or
+        type(obj) == 'lightfunction'
+        then
         local id = tostring(obj)
         d.refs[id] = obj
         return id
       else
-        error('tango.ref proxy did not create table nor userdata')
+        error('tango.dispatcher cannot ref not a non-ref value')
       end
     end
     
