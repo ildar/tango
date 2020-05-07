@@ -22,6 +22,7 @@ Backends included
 * copas  
 * [lua-zmq](https://github.com/Neopallium/lua-zmq)
 * [lua-ev](https://github.com/brimworks/lua-ev)
+* [lgi](https://github.com/pavouk/lgi)
 * [NodeMCU server](https://nodemcu.readthedocs.io/)
 
 Tutorial (copas_socket server +  socket client)
@@ -185,7 +186,7 @@ tango does not need to be installed.
 Client/Server compatibilities
 -----------------------------
 
-<table border="1">               
+<table border="1">
         <tr>
                 <th></th><th>tango.client.socket</th><th>tango.client.zmq</th>
         </tr>
@@ -194,6 +195,12 @@ Client/Server compatibilities
         </tr>
         <tr>
                 <th>tango.server.ev_socket</th><th>X</th><th></th>
+        </tr>
+        <tr>
+                <th>tango.server.lgi_async</th><th>X</th><th></th>
+        </tr>
+        <tr>
+                <th>tango.server.nodemcu.net</th><th>X</th><th></th>
         </tr>
         <tr>
                 <th>tango.server.zmq</th><th></th><th>X</th>
