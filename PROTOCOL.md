@@ -27,13 +27,21 @@ Request message (body)
 ----------------------
 is an array table:
 
-* `[1]` is the method name (full path)
+* `[1]` root object reference
+* `[2]` is the method name (path relative to the root)
 * `[...]` method args
+
+The root object reference may be:
+
+1. empty string
+2. a table reference
+3. any other reference (see details below)
 
 "method" is a path to some entity in context of the Tango server. It may be:
 
 1. a table element (field) or
-2. a function
+2. a function or
+3. just ommited
 
 In case it is a table field then:
 
@@ -44,6 +52,13 @@ In case it is a function it's just called.
 
 Note: "mere" Lua variable is actually a "global variable" which is the field
 of the global `_G` table.
+
+On the root object reference. If it is the empty string then the method is
+relative to the tango server (_G or functab, see README). If it is the table
+reference (see below) then method is relative to that table. If it is the any
+other object reference (e.g. function) then method should be ommited and
+the object is called in the context of the tango server with method args as
+described above.
 
 Response message (body)
 -----------------------

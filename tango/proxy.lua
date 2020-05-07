@@ -29,14 +29,12 @@ function new(send_request,recv_response,method_name)
               end
               -- create new call proxy
               proxy = new(send_request,recv_response,new_method_name)
-              -- store for subsequent access
-              rawset(self,sub_method_name,proxy)
             end                            
             return proxy
           end,        
         __call=
           function(self,...)
-            send_request({method_name,...})
+            send_request({"",method_name,...})
             local response = recv_response()
             if response[1] == true then
               return unpack(response,2)

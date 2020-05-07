@@ -14,7 +14,8 @@ local error_msg =
 
 local new = 
   function(config)        
-    local d = {
+    local d
+    d = {
       functab = config.functab,
       pcall = config.pcall,
       read_access = config.read_access,
@@ -22,7 +23,10 @@ local new =
       dispatch = 
         function(self,request)    
           local var = self.functab
-          local var_name = request[1]
+          if request[1] ~= "" then
+            var = d.refs[request[1]]
+          end
+          local var_name = request[2]
           local last_part
           local last_var
           for part in var_name:gmatch('[%w_]+') do
@@ -35,9 +39,9 @@ local new =
             end  
           end        
           if type(var) == 'function' or type(var) == 'lightfunction' then
-            return {self.pcall(var,unpack(request,2))}
+            return {self.pcall(var,unpack(request,3))}
           else
-            local val = request[2]
+            local val = request[3]
             if val then
               if not self.write_access then
                 return {false,error_msg(var_name,'no write_access')}
@@ -74,7 +78,7 @@ local new =
     
     d.functab.tango.ref_create = 
       function(create_method,...)
-        local result = d:dispatch({create_method,...})
+        local result = d:dispatch({"", create_method,...})
         if result[1] == true then
           return d.functab.tango.__mkref(result[2])
         else
