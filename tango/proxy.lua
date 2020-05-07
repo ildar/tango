@@ -8,9 +8,10 @@ local print = print
 
 module('tango.proxy')
 
-function new(send_request,recv_response,method_name)
+function new(send_request,recv_response,root_object,method_name)
     return setmetatable(
       {
+        __tango_root_object = root_object or "",
         __tango_method_name = method_name,
         __tango_send_request = send_request,
         __tango_recv_response = recv_response
@@ -25,11 +26,11 @@ function new(send_request,recv_response,method_name)
               new_method_name = method_name..'.'..sub_method_name
             end
             -- create new call proxy
-            return new(send_request,recv_response,new_method_name)
+            return new(send_request,recv_response,root_object,new_method_name)
           end,        
         __call=
           function(self,...)
-            send_request({"",method_name,...})
+            send_request({root_object or "",method_name,...})
             local response = recv_response()
             if response[1] == true then
               return unpack(response,2)
@@ -43,12 +44,13 @@ function new(send_request,recv_response,method_name)
 local rproxies = {}
 
 local function root(proxy)
+    local root_object = rawget(proxy,'__tango_root_object')
     local method_name = rawget(proxy,'__tango_method_name')
     local send_request = rawget(proxy,'__tango_send_request')
     local rproxy
     if not rproxies[send_request] then
       local recv_response = rawget(proxy,'__tango_recv_response')
-      rproxy = new(send_request,recv_response)
+      rproxy = new(send_request,recv_response,root_object)
       rproxies[send_request] = rproxy
     end
     return rproxies[send_request],method_name
