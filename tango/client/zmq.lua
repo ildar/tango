@@ -28,7 +28,7 @@ connect =
         local response_str = socket:recv()
         return unserialize(response_str)    
       end    
-    return proxy.new(send_request,recv_response)
+    return proxy.new({send_request=send_request,recv_response=recv_response})
   end
 
 return {

@@ -4,17 +4,20 @@ local type = type
 local error = error
 local unpack = unpack
 local setmetatable = setmetatable
+local assert = assert
 local print = print
 
 module('tango.proxy')
 
-function new(send_request,recv_response,root_object,method_name)
+local function new(proxy_conf,root_object,method_name)
+  assert(proxy_conf)
+  assert(proxy_conf.send_request)
+  assert(proxy_conf.recv_response)
     return setmetatable(
       {
         __tango_root_object = root_object or "",
         __tango_method_name = method_name,
-        __tango_send_request = send_request,
-        __tango_recv_response = recv_response
+        __tango_proxy_conf = proxy_conf
       },
       {
         __index= 
@@ -26,15 +29,15 @@ function new(send_request,recv_response,root_object,method_name)
               new_method_name = method_name..'.'..sub_method_name
             end
             -- create new call proxy
-            return new(send_request,recv_response,root_object,new_method_name)
+            return new(proxy_conf,root_object,new_method_name)
           end,        
         __call=
           function(self,...)
-            send_request({root_object or "",method_name,...})
-            local response = recv_response()
+            proxy_conf.send_request({root_object or "",method_name,...})
+            local response = proxy_conf.recv_response()
             for i=2,#response do
               if type(response[i]) == 'table' and response[i].__ref_id then
-                response[i] = new(send_request,recv_response,response[i].__ref_id)
+                response[i] = new(proxy_conf,response[i].__ref_id)
               end
             end
             if response[1] == true then
@@ -55,14 +58,13 @@ local rproxies = {}
 local function root(proxy)
     local root_object = rawget(proxy,'__tango_root_object')
     local method_name = rawget(proxy,'__tango_method_name')
-    local send_request = rawget(proxy,'__tango_send_request')
+    local proxy_conf = rawget(proxy,'__tango_proxy_conf')
     local rproxy
-    if not rproxies[send_request] then
-      local recv_response = rawget(proxy,'__tango_recv_response')
-      rproxy = new(send_request,recv_response,root_object)
-      rproxies[send_request] = rproxy
+    if not rproxies[proxy_conf.send_request] then
+      rproxy = new(proxy_conf,root_object)
+      rproxies[proxy_conf.send_request] = rproxy
     end
-    return rproxies[send_request],method_name
+    return rproxies[proxy_conf.send_request],method_name
   end
 
 function ref(proxy,...)

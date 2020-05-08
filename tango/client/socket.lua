@@ -67,7 +67,7 @@ connect =
           close_and_rethrow(result)
         end
       end  
-    return proxy.new(send_request,recv_response)
+    return proxy.new({send_request=send_request,recv_response=recv_response})
   end
 
 return {
