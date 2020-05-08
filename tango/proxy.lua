@@ -15,7 +15,13 @@ local function new(proxy_conf,root_object,method_name)
   assert(proxy_conf.recv_response)
   
   local function rpc(...)
-    proxy_conf.send_request({...})
+    local req = {...}
+    for i=1,#req do
+      if type(req[i]) == 'table' and req[i].__tango_root_object then
+        req[i] = { __ref_id=req[i].__tango_root_object }
+      end
+    end
+    proxy_conf.send_request(req)
     local response = proxy_conf.recv_response()
     for i=2,#response do
       if type(response[i]) == 'table' and response[i].__ref_id then
