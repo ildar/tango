@@ -13,6 +13,18 @@ local function new(proxy_conf,root_object,method_name)
   assert(proxy_conf)
   assert(proxy_conf.send_request)
   assert(proxy_conf.recv_response)
+  
+  local function rpc(...)
+    proxy_conf.send_request({...})
+    local response = proxy_conf.recv_response()
+    for i=2,#response do
+      if type(response[i]) == 'table' and response[i].__ref_id then
+        response[i] = new(proxy_conf,response[i].__ref_id)
+      end
+    end
+    return response
+  end
+    
     return setmetatable(
       {
         __tango_root_object = root_object or "",
@@ -33,18 +45,11 @@ local function new(proxy_conf,root_object,method_name)
           end,        
         __call=
           function(self,...)
-            proxy_conf.send_request({root_object or "",method_name,...})
-            local response = proxy_conf.recv_response()
-            for i=2,#response do
-              if type(response[i]) == 'table' and response[i].__ref_id then
-                response[i] = new(proxy_conf,response[i].__ref_id)
-              end
-            end
-            if response[1] == true then
-              return unpack(response,2)
-            else
+            local response = rpc(root_object or "", method_name, ...)
+            if response[1] ~= true then
               error(response[2],2)
             end
+            return unpack(response,2)
           end,
         __newindex=
           function(self, elem, val)
