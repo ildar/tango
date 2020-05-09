@@ -68,6 +68,14 @@ describe("Remote tables", function()
        assert.equals("cdab", a2_str)
      end)
 
+  it("can be used as objects",
+     function()
+       local pref = client.io.popen('echo hello')
+       local match = pref:read('*a'):find('hello')
+       pref:close()
+       assert.truthy(match)
+     end)
+
 end)
 
 describe("Remote functions", function()

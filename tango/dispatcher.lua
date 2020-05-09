@@ -72,10 +72,10 @@ local new =
           -- replace real objects with ref-tables
           for i=2,#res do
             if type(res[i]) == 'table' or
-              type(res[i]) == 'romtable' or
-              type(res[i]) == 'userdata' or
-              type(res[i]) == 'function' or
-              type(res[i]) == 'lightfunction'
+                type(res[i]) == 'romtable' or
+                type(res[i]) == 'userdata' or
+                type(res[i]) == 'function' or
+                type(res[i]) == 'lightfunction'
               then
               res[i] = { __ref_id = d.functab.tango.__mkref(res[i]) }
             end
@@ -90,12 +90,15 @@ local new =
     -- Tango server API
     function d.functab.tango.__mkref(obj)
       if type(obj) == 'table' or
-        type(obj) == 'romtable' or
-        type(obj) == 'userdata' or
-        type(obj) == 'function' or
-        type(obj) == 'lightfunction'
+          type(obj) == 'romtable' or
+          type(obj) == 'userdata' or
+          type(obj) == 'function' or
+          type(obj) == 'lightfunction'
         then
         local id = tostring(obj)
+        if type(obj) == 'userdata' then
+          id = 'userdata:' .. id
+        end
         d.refs[id] = obj
         return id
       else
