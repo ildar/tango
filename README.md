@@ -19,13 +19,13 @@ frameworks, further called backends
 Backends included
 ---------------------
 
-* copas  
+* copas
 * [lua-zmq](https://github.com/Neopallium/lua-zmq)
 * [lua-ev](https://github.com/brimworks/lua-ev)
 * [lgi](https://github.com/pavouk/lgi)
 * [NodeMCU server](https://nodemcu.readthedocs.io/)
 
-Tutorial (copas_socket server +  socket client)
+Tutorial (copas_socket server + socket client)
 ============================
 
 Greetings!
@@ -47,7 +47,7 @@ tango.server.copas_socket.loop{
 ```
 
 The client code calling the remote server function `greet`
-      
+
 ```lua
 -- load tango module
 local tango = require'tango'
@@ -63,14 +63,14 @@ con.greet('Hello','Horst')
 Access anything?
 ----------------
 
-Since the server exposes the global table `_G` per default, the client may even
+Since the server exposes the global table `_G` by default, the client may even
 directly call `print`,let the server sleep a bit remotely
 (`os.execute`) or calc some stuff (`math.sqrt`).
 
 ```lua
 -- variable argument count is supported
 con.print('I','call','print','myself')
--- any function or variable in the server's _G can be accessed by default        
+-- any function or variable in the server's _G can be accessed by default
 con.os.execute('sleep 1')
 con.math.sqrt(4)
 ```
@@ -98,9 +98,7 @@ Remote Variables
 -----------------
 
 Sometimes you need to get some data from the server, as
-enumaration-like-constants for instance. Instead of creating a mess of
-remote getters and setters, just treat the value of interest as a
-function...
+enumaration-like-constants for instance. Easy-peasy!
 
 Let's read the remote table friends from the server
 
@@ -109,24 +107,18 @@ local tango = require'tango'
 -- connect to server as usual
 local con = tango.client.socket.connect()
 -- friends is a remote table but could be of any other type
-local friends = con.friends()
+local friends = con.friends
 ```
 
-To change the servers state, just pass the new value as
-argument:
+To change the servers state, just assign a new value as usual:
 
 ```lua
 local tango = require'tango'
 local con = tango.client.socket.connect()
 -- read the remote variable
-local friends = con.friends()
+local friends = con.friends
 -- modify it 
 table.insert(friends,'Horst')
--- and write back the new value
-client.friends(friends)
--- actually simple assignment also works:
-client.friends = friends
--- But for now this is FIXME: doesn't work if `client.friends` touched before
 ```
 
 If you are worried about security concerns, just do not allow
@@ -142,39 +134,19 @@ tango.server.copas_socket.loop{
 }
 ```
 
-Using classes/tables/objects remotely (tango.ref)
------------------------------------------
+Using classes/tables/objects remotely
+-------------------------------------
 
-Even if Lua does not come with a class model, semi-object-oriented
-programming is broadly used via the semicolon operator, e.g.:
+Lua progamming language has basic types (e.g. numbers, strings etc.) and
+object types. The basic types are assigned and passed as values while object
+type have references. The oject types are: tables, functions, userdata and
+thread.
 
-```lua
--- assume you open a pipe locally
-local p = io.popen('ls')
--- and read some stuff from it, ... note the : operator
-local line = p:read('*l')
-...
-p:close()
-```
+Tango provides ways to push and pull values of basic types. But object types
+are represented by proxy objects (tables) that allows to handle remote objects
+in most natural ways.
 
-To allow such construct remotely via tango, one has to use the
-`tango.ref`:
-
-```lua
-local con = tango.client.socket.connect()
--- pass in the remote function and all arguments required (optionally)
-local p = tango.ref(con.io.popen,'ls')
--- now proceed as if p was a local object
-local line = p:read('*l')
-...
-p:close()
--- unref it locally to let the server release it
-tango.unref(p)
-```
-
-This may seem a bit awkward, but it is certainly less hassle, then
-writing non-object-oriented counterparts on the server side.
-
+See the examples in `spec/` and `test_*.lua`
 
 Tests
 =====

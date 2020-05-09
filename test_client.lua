@@ -102,33 +102,31 @@ test('nested method name test',
 
 test('tango.ref with io.popen',
      function()
-       local pref = tango.ref(client.io.popen,'echo hello')
+       local pref = client.io.popen('echo hello')
        local match = pref:read('*a'):find('hello')
        pref:close()
-       tango.unref(pref)
        return match
      end)
 
 test('tango.ref with person',
      function()
-       local pref = tango.ref(client.person,'horst')
+       local pref = client.person('horst')
        pref:name('peter')
        local match = pref:name() == 'peter'
-       tango.unref(pref)
        return match
      end)
 
 test('creating and accessing variables with number',
      function()
-       client.x(4)
-       return client.x() == 4 and client.double_x() == 8
+       client.x = 4
+       return client.x == 4 and client.double_x() == 8
      end)
 
 test('creating and accessing variables with tables',
      function()
-       client.abc({sub='horst',tab={}})
-       client.abc.tab.num(1234)
-       local abc = client.abc()
+       client.abc = {sub='horst',tab={}}
+       client.abc.tab.num = 1234
+       local abc = client.abc
        return type(abc) == 'table' and abc.sub == 'horst' and abc.tab.num == 1234
      end)
 
@@ -138,7 +136,7 @@ test('accessing not existing tables causes error',
          function()
            client.horst.dieter()
          end)
-       return ok == false and err:find('horst.dieter')
+       return ok == false and err:find('horst')
      end)
 
 if server then
@@ -149,7 +147,7 @@ client = connect(config)
 
 test('reading remote variable',
      function()         
-       local d = client.data()
+       local d = client.data
        return d.x == 0 and d.y == 3
      end)
 
@@ -157,7 +155,7 @@ test('writing remote variable causes error',
      function()
        local ok,err = pcall(
          function()
-           client.data(33)
+           client.data = 33
          end)
        return ok == false
      end)
@@ -170,7 +168,7 @@ test('reading remote variable causes error',
      function()
        local ok,err = pcall(
          function()
-           client.data()
+           return client.data
          end)
        return ok == false
      end)
@@ -179,7 +177,7 @@ test('writing remote variable',
      function()
        local ok,err = pcall(
          function()
-           client.data(33)
+           client.data = 33
          end)
        return ok == true
      end)
