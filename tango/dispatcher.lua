@@ -13,7 +13,7 @@ local error_msg =
    end
 
 local new = 
-  function(config)        
+  function(config)
     local d
     d = {
       functab = config.functab,
@@ -22,66 +22,69 @@ local new =
       write_access = config.write_access,
       dispatch = 
         function(self,request)    
-          local var = self.functab
-          if request[1] ~= "" then
-            var = d.refs[request[1]]
+          local obj
+          if type(request[1]) ~= 'string' then
+            return {false,error_msg(request[1],'should be an object encoded in string')}
           end
-          local var_name = request[2]
-          local last_part
-          local last_var
-          for part in var_name:gmatch('[%w_]+') do
-            last_part = part
-            last_var = var
-            if type(var) == 'table' or type(var) == 'romtable' then
-              var = var[part]
-            else
-              return {false,error_msg(var_name,'no such variable')}
+          if request[1]:find(':') then
+            obj = d.refs[request[1]]
+          end
+          if request[1]:sub(1,6) == 'tango.' then
+            obj = self.functab
+            for part in request[1]:gmatch('[%w_]+') do
+              if type(obj) == 'table' or type(obj) == 'romtable' then
+                obj = obj[part]
+              else
+                return {false,error_msg(request[1],'no such variable')}
+              end
             end
           end
+          
           -- replace ref-tables with real objects
-          for i=3,#request do
+          for i=2,#request do
             if type(request[i]) == 'table' and request[i].__ref_id then
               request[i] = d.refs[request[i].__ref_id]
             end
           end
-          if type(var) == 'function' or type(var) == 'lightfunction' then
-            local res = {self.pcall(var,unpack(request,3))}
-            -- replace ref-tables with real objects
-            for i=1,#res do
-              if type(res[i]) == 'table' or
-                type(res[i]) == 'romtable' or
-                type(res[i]) == 'userdata' or
-                type(res[i]) == 'function' or
-                type(res[i]) == 'lightfunction'
-                then
-                res[i] = { __ref_id = d.functab.tango.__mkref(res[i]) }
-              end
-            end
-            return res
-          else
+          -- do
+          local res
+          if type(obj) == 'function' or type(obj) == 'lightfunction' then
+            res = {self.pcall(obj,unpack(request,2))}
+          else -- a table
             local val = request[3]
-            if val then
+            if val then -- writing a value
               if not self.write_access then
-                return {false,error_msg(var_name,'no write_access')}
+                return {false,error_msg(obj,'no write_access')}
               else
-                return {self.pcall(
+                res = {self.pcall(
                               function()
-                                 last_var[last_part] = val
+                                 obj[request[2]] = val
                               end)}
               end
-            else
+            else -- reading a value
               if not self.read_access then
-                 return {false,error_msg(var_name,'no read_access')}
+                 return {false,error_msg(obj,'no read_access')}
               else
-                 return {true,var}
+                 res = {true,obj[request[2]]}
               end
              end
-          end        
-          
-        end    
+          end
+          -- replace ref-tables with real objects
+          for i=2,#res do
+            if type(res[i]) == 'table' or
+              type(res[i]) == 'romtable' or
+              type(res[i]) == 'userdata' or
+              type(res[i]) == 'function' or
+              type(res[i]) == 'lightfunction'
+              then
+              res[i] = { __ref_id = d.functab.tango.__mkref(res[i]) }
+            end
+          end
+          return res
+        end
     }
 
-    d.refs = {}
+    d.refs = { ["tango:env"] = d.functab }
     d.functab.tango = d.functab.tango or {}
     
     function d.functab.tango.__mkref(obj)

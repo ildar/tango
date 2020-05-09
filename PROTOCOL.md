@@ -27,38 +27,30 @@ Request message (body)
 ----------------------
 is an array table:
 
-* `[1]` root object reference
-* `[2]` is the method name (path relative to the root)
-* `[...]` method args
+* `[1]` object reference
+* `[...]` args
 
-The root object reference may be:
+The object reference may be:
 
-1. empty string
-2. a table reference
+1. a table reference
+2. a function reference
 3. any other reference (see details below)
-
-"method" is a path to some entity in context of the Tango server. It may be:
-
-1. a table element (field) or
-2. a function or
-3. just ommited
+4. tango API function name (starting with `tango.`)
 
 In case it is a table field then:
 
 1. [...] == nil -> get the value
-2. [...] ~= nil -> set the value
+2. [...] ~= nil -> set the value to [2]
 
-In case it is a function it's just called.
+In case it is a function it is called with [...] as arguments.
 
-Note: "mere" Lua variable is actually a "global variable" which is the field
-of the global `_G` table.
+With other Lua objects which (besides tables and functions) are userdata and
+thread the behavior is currently undefined.
 
-On the root object reference. If it is the empty string then the method is
-relative to the tango server (_G or functab, see README). If it is the table
-reference (see below) then method is relative to that table. If it is the any
-other object reference (e.g. function) then method should be ommited and
-the object is called in the context of the tango server with method args as
-described above.
+All object references match the pattern `TYPE: iD`
+
+Tango API names are simple symbolic `tango.APIFUNC`. Functions called
+with [...] as arguments.
 
 Response message (body)
 -----------------------
@@ -67,22 +59,13 @@ is also an array table:
 * `[1]` is the boolean indicating if the request succeeded or not
 * `[...]` either the return value of the request or the error message
 
-References
-----------
-to the Lua objects. These are by definition: tables, functions, userdata and
-thread.
-
-Currently client and server implement references through
-`tango.ref`/`tango.unref`/`ref_call`. Those work through normal "method" calls.
-Hence this works according the rules above.
-
 Example
 -------
 Client:
 
 ```
-11
-{"add",1,2}
+25
+{"function: 0x98765",1,2}
 ```
 
 Server:

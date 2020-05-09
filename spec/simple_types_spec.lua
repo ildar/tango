@@ -53,9 +53,9 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
      function()
        local tab = {number=444,name='horst',bool=true}
        local tab2 = client.echo(tab)
-       assert.is_equal( tab.number, tab2.number() )
-       assert.is_equal( tab.name, tab2.name() )
-       assert.is_equal( tab.bool, tab2.bool() )
+       assert.is_equal( tab.number, tab2.number )
+       assert.is_equal( tab.name, tab2.name )
+       assert.is_equal( tab.bool, tab2.bool )
      end)
 
   it("can return multiple values",
@@ -64,7 +64,7 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
        local a2,b2,c2 = client.echo(a,b,c)
        assert.is_equal( a, a2 )
        assert.is_equal( b, b2 )
-       assert.is_equal( c.el, c2.el() )
+       assert.is_equal( c.el, c2.el )
      end)
 
   it("can do string error",
@@ -81,7 +81,7 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
        local status,errtab2 = pcall(function()client.customerror(errtab)end)
        assert.is_equal( false, status )
        assert.is_equal( 'table', type(errtab2) )
-       assert.is_equal( errtab.code, errtab2.code() )
+       assert.is_equal( errtab.code, errtab2.code )
      end)
 
   it("can nested method name",
@@ -91,26 +91,16 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
 
   it("should create and access variables with number",
      function()
-       client.x(4)
-       assert.is_equal( 4, client.x() )
+       client.x = 4
+       assert.is_equal( 4, client.x )
        assert.is_equal( 8, client.double_x() )
      end)
 
   it("should create and access variables with tables",
      function()
-       client.abc({sub='horst',tab={}})
-       client.abc.tab.num(1234)
-       local abc = client.abc()
-       assert.is_equal( 'table', type(abc) )
-       assert.is_equal( 'horst', abc.sub )
-       assert.is_equal( 1234, abc.tab.num )
-     end)
-
-  it("should assign table elements",
-     function()
        client.abc = {sub='horst',tab={}}
        client.abc.tab.num  = 1234
-       local abc = client.abc()
+       local abc = client.abc
        assert.is_equal( 'table', type(abc) )
        assert.is_equal( 'horst', abc.sub )
        assert.is_equal( 1234, abc.tab.num )
@@ -123,7 +113,7 @@ describe("#BasicTests for the client side of Tango module (rw cases)", function(
            client.horst.dieter()
          end)
        assert.is_equal( false, ok )
-       assert.is.truthy( err:find('horst.dieter') )
+       assert.is.truthy( err:find('horst') )
      end)
 end)
 
@@ -137,7 +127,7 @@ describe("Tests the client side of Tango module (ro cases)", function()
     end)
   it("can read remote variable",
      function()         
-       local d = client.data()
+       local d = client.data
        assert.is_equal( 0, d.x )
        assert.is_equal( 3, d.y )
      end)
@@ -146,7 +136,7 @@ describe("Tests the client side of Tango module (ro cases)", function()
      function()
        local ok,err = pcall(
          function()
-           client.data(33)
+           client.data = 33
          end)
        assert.is_equal( false, ok )
      end)
@@ -164,7 +154,7 @@ describe("Tests the client side of Tango module (wo cases)", function()
      function()
        local ok,err = pcall(
          function()
-           client.data()
+           return client.data
          end)
        assert.is_equal( false, ok )
      end)
@@ -173,7 +163,7 @@ describe("Tests the client side of Tango module (wo cases)", function()
      function()
        local ok,err = pcall(
          function()
-           client.data(33)
+           client.data = 33
          end)
        assert.is_equal( true, ok )
      end)

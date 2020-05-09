@@ -30,28 +30,27 @@ local function new(proxy_conf,root_object,method_name)
     end
     return response
   end
-    
+
+  root_object = root_object or "tango:env"
     return setmetatable(
       {
-        __tango_root_object = root_object or "",
+        __tango_root_object = root_object,
+        __tango_type = root_object:sub(1, root_object:find(':')),
         __tango_method_name = method_name,
         __tango_proxy_conf = proxy_conf
       },
       {
         __index= 
-          function(self,sub_method_name)
-            local new_method_name
-            if not method_name then
-              new_method_name = sub_method_name
-            else
-              new_method_name = method_name..'.'..sub_method_name
+          function(self, elem)
+            local response = rpc(root_object, elem)
+            if response[1] ~= true then
+              error(response[2],2)
             end
-            -- create new call proxy
-            return new(proxy_conf,root_object,new_method_name)
+            return response[2]
           end,        
         __call=
           function(self,...)
-            local response = rpc(root_object or "", method_name, ...)
+            local response = rpc(root_object, ...)
             if response[1] ~= true then
               error(response[2],2)
             end
@@ -59,7 +58,10 @@ local function new(proxy_conf,root_object,method_name)
           end,
         __newindex=
           function(self, elem, val)
-            self[elem](val)
+            local response = rpc(root_object, elem, val)
+            if response[1] ~= true then
+              error(response[2],2)
+            end
           end
       })
   end

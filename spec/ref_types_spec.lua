@@ -47,35 +47,24 @@ describe("Remote tables", function()
 
   it("can be created",
     function()
-      client.tab1 ( {} )
-      local l_tab1 = tango.ref(client.tab1)
-      l_tab1.name = 'John'
-      assert.equal( 'John', l_tab1.name )
-      --[[
-      l_tab1.surname( 'Doe' )
-      assert.equal( 'Doe', l_tab1.surname )
-      tango.unref(l_tab1)
-      ]]
+      client.tab1 = {}
+      client.tab1.name = 'John'
+      assert.equal( 'John', client.tab1.name )
     end)
 
-  pending("can be passed as an argument",
+  it("can be passed as an argument",
      function()
-       client.a1 ( {"a","b"} )
-       local l_a1 = tango.ref(client.a1)
-       local a1_str = client.table.concat(l_a1)
-       tango.unref(l_a1)
+       client.a1 = {"a","b"}
+       local a1_str = client.table.concat(client.a1)
        assert.equals("ab", a1_str)
      end)
 
-  pending("can be passed as double arguments",
+  it("can be passed as double arguments",
      function()
-       client.a1 ( {"a","b"} )
-       local l_a1 = tango.ref(client.a1)
-       client.a2 ( {"c","d"} )
-       local l_a2 = tango.ref(client.a2)
-       client.table.move(l_a1, 1, 2, 3, l_a2)
-       local a2_str = client.table.concat(l_a2)
-       tango.unref(l_a1) ; tango.unref(l_a2)
+       client.a1 = {"a","b"}
+       client.a2 = {"c","d"}
+       client.table.move(client.a1, 1, 2, 3, client.a2)
+       local a2_str = client.table.concat(client.a2)
        assert.equals("cdab", a2_str)
      end)
 
