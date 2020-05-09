@@ -1,5 +1,3 @@
-local rawget = rawget
-local rawset = rawset
 local type = type
 local error = error
 local unpack = unpack
@@ -9,7 +7,7 @@ local print = print
 
 module('tango.proxy')
 
-local function new(proxy_conf,root_object,method_name)
+local function new(proxy_conf,objid)
   assert(proxy_conf)
   assert(proxy_conf.send_request)
   assert(proxy_conf.recv_response)
@@ -17,8 +15,8 @@ local function new(proxy_conf,root_object,method_name)
   local function rpc(...)
     local req = {...}
     for i=1,#req do
-      if type(req[i]) == 'table' and req[i].__tango_root_object then
-        req[i] = { __ref_id=req[i].__tango_root_object }
+      if type(req[i]) == 'table' and req[i].__tango_objid then
+        req[i] = { __ref_id=req[i].__tango_objid }
       end
     end
     proxy_conf.send_request(req)
@@ -31,18 +29,17 @@ local function new(proxy_conf,root_object,method_name)
     return response
   end
 
-  root_object = root_object or "tango:env"
+  objid = objid or "tango:env"
     return setmetatable(
       {
-        __tango_root_object = root_object,
-        __tango_type = root_object:sub(1, root_object:find(':')),
-        __tango_method_name = method_name,
+        __tango_objid = objid,
+        __tango_type = objid:sub(1, objid:find(':')),
         __tango_proxy_conf = proxy_conf
       },
       {
         __index= 
           function(self, elem)
-            local response = rpc(root_object, elem)
+            local response = rpc(objid, elem)
             if response[1] ~= true then
               error(response[2],2)
             end
@@ -50,7 +47,7 @@ local function new(proxy_conf,root_object,method_name)
           end,        
         __call=
           function(self,...)
-            local response = rpc(root_object, ...)
+            local response = rpc(objid, ...)
             if response[1] ~= true then
               error(response[2],2)
             end
@@ -58,60 +55,14 @@ local function new(proxy_conf,root_object,method_name)
           end,
         __newindex=
           function(self, elem, val)
-            local response = rpc(root_object, elem, val)
+            local response = rpc(objid, elem, val)
             if response[1] ~= true then
               error(response[2],2)
             end
           end
       })
-  end
-
-local rproxies = {}
-
-local function root(proxy)
-    local root_object = rawget(proxy,'__tango_root_object')
-    local method_name = rawget(proxy,'__tango_method_name')
-    local proxy_conf = rawget(proxy,'__tango_proxy_conf')
-    local rproxy
-    if not rproxies[proxy_conf.send_request] then
-      rproxy = new(proxy_conf,root_object)
-      rproxies[proxy_conf.send_request] = rproxy
-    end
-    return rproxies[proxy_conf.send_request],method_name
-  end
-
-function ref(proxy,...)
-    local rproxy,create_method = root(proxy)
-    return setmetatable(
-      {
-        __tango_id = rproxy.tango.ref_create(create_method,...),
-        __tango_proxy = rproxy
-      },
-      {
-        __index = 
-          function(self,method_name)
-            return setmetatable(
-              {                
-              },
-              {
-                __call =
-                  function(_,ref,...)
-                    local proxy = rawget(ref,'__tango_proxy')
-                    return proxy.tango.ref_call(rawget(self,'__tango_id'),method_name,...)
-                  end
-              })
-          end
-      })                      
-  end
-
-function unref(ref)
-    local proxy = rawget(ref,'__tango_proxy')
-    local id = rawget(ref,'__tango_id')
-    proxy.tango.ref_release(id)
-  end
+end
 
 return {
   new = new,
-  ref = ref,
-  unref = unref
 }

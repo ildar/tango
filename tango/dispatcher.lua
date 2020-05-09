@@ -26,6 +26,7 @@ local new =
           if type(request[1]) ~= 'string' then
             return {false,error_msg(request[1],'should be an object encoded in string')}
           end
+          -- replace refs with real objects
           if request[1]:find(':') then
             obj = d.refs[request[1]]
           end
@@ -39,7 +40,6 @@ local new =
               end
             end
           end
-          
           -- replace ref-tables with real objects
           for i=2,#request do
             if type(request[i]) == 'table' and request[i].__ref_id then
@@ -69,7 +69,7 @@ local new =
               end
              end
           end
-          -- replace ref-tables with real objects
+          -- replace real objects with ref-tables
           for i=2,#res do
             if type(res[i]) == 'table' or
               type(res[i]) == 'romtable' or
@@ -87,6 +87,7 @@ local new =
     d.refs = { ["tango:env"] = d.functab }
     d.functab.tango = d.functab.tango or {}
     
+    -- Tango server API
     function d.functab.tango.__mkref(obj)
       if type(obj) == 'table' or
         type(obj) == 'romtable' or
@@ -102,30 +103,10 @@ local new =
       end
     end
     
-    d.functab.tango.ref_create = 
-      function(create_method,...)
-        local result = d:dispatch({"", create_method,...})
-        if result[1] == true then
-          return d.functab.tango.__mkref(result[2])
-        else
-          error(result[2])
-        end
-      end
-
     d.functab.tango.ref_release = 
       function(refid)
         d.refs[refid] = nil
       end
-    
-    d.functab.tango.ref_call = 
-      function(refid,method_name,...)
-        local obj = d.refs[refid]
-        if obj then
-          return obj[method_name](obj,...)
-        else
-          error('tango.ref invalid id' .. refid)
-        end          
-      end    
 
     return d
   end
