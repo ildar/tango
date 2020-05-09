@@ -48,7 +48,10 @@ local new =
           end
           -- do
           local res
-          if type(obj) == 'function' or type(obj) == 'lightfunction' then
+          if type(obj) == 'function' or
+              type(obj) == 'lightfunction' or
+              (type(obj) == 'userdata' and tostring(obj):sub(1,7) == 'lgi.fun')
+            then
             res = {self.pcall(obj,unpack(request,2))}
           else -- a table
             local val = request[3]
