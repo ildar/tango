@@ -33,7 +33,7 @@ local function new(proxy_conf,objid)
     return setmetatable(
       {
         __tango_objid = objid,
-        __tango_type = objid:sub(1, objid:find(':')),
+        __tango_type = objid:sub(1, objid:find(':')-1),
         __tango_proxy_conf = proxy_conf
       },
       {

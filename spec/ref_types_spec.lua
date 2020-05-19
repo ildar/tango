@@ -71,7 +71,7 @@ describe("Remote tables", function()
   it("can be used as objects",
      function()
        local pref = client.io.popen('echo -n hello')
-       assert.equal( 'userdata:', pref.__tango_type:sub(1,9) )
+       assert.equal( 'userdata', pref.__tango_type:sub(1,8) )
        local fileinput = pref:read('*a')
        assert.equal( 'hello', fileinput )
        pref:close()
