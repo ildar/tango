@@ -29,4 +29,26 @@ describe("Serialization module", function()
           assert.equal(arr[k], arr1[k])
         end
       end)
+  
+    it("can handle problematic strings",
+    function()
+      local s1,ss1
+      s1 = "s1 contains \',\",\\, ok?"
+      ss1 = serialize({s1})
+      assert.truthy( ss1 and (#ss1>0) )
+      assert.is_equal( s1, unserialize(ss1)[1] )
+      s1 = "s1 contains newlines,\nok?"
+      ss1 = serialize({s1})
+      assert.truthy( ss1 and (#ss1>0) )
+      assert.is_equal( s1, unserialize(ss1)[1] )
+      s1 = "s1 contains non-latin chars (аәбвгғ), ok?"
+      ss1 = serialize({s1})
+      assert.truthy( ss1 and (#ss1>0) )
+      assert.is_equal( s1, unserialize(ss1)[1] )
+      s1 = "s1 contains null chars (\0), ok?"
+      ss1 = serialize({s1})
+      assert.truthy( ss1 and (#ss1>0) )
+      assert.is_equal( s1, unserialize(ss1)[1] )
+    end)
+
   end)

@@ -13,18 +13,16 @@ local loadstring = loadstring
 local print = print
 
 --- The default tango serialization module.
--- Uses table serialization from http://lua/users.org/wiki/TableUtils and loadstring for unserialize.
+-- Uses table serialization from http://lua-users.org/wiki/TableUtils and loadstring for unserialize.
 module('tango.utils.serialization')
 
 serialize = nil
 
 local converters = {
   string = function(v)
+             v = sgsub(v,'["\\]','\\%0')
              v = sgsub(v,"\n","\\n")
-             if smatch(sgsub(v,"[^'\"]",""),'^"+$') then
-               return "'"..v.."'"
-             end
-             return '"'..sgsub(v,'"','\\"')..'"'             
+             return '"' .. v .. '"'
            end,
   table = function(v)
             return serialize(v)
