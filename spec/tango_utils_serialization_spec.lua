@@ -49,6 +49,16 @@ describe("Serialization module", function()
       ss1 = serialize({s1})
       assert.truthy( ss1 and (#ss1>0) )
       assert.is_equal( s1, unserialize(ss1)[1] )
+      
+      s1 = string.dump(function() return 33 end) -- this is truly problematic string
+      ss1 = serialize({s1})
+      assert.truthy( ss1 and (#ss1>0) )
+      local unss1 = unserialize(ss1)[1]
+      assert.is_equal( s1:len(), unss1:len() )
+      for i=1,#s1 do
+        assert.is_equal( s1:byte(i), unss1:byte(i) )
+      end
+      assert.is_equal( s1, unss1 )
     end)
 
   end)

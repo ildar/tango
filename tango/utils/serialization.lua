@@ -1,8 +1,8 @@
+local assert = assert
 local tinsert = table.insert
 local tconcat = table.concat
 local tremove = table.remove
 local smatch = string.match
-local sgmatch = string.gmatch
 local sgsub = string.gsub
 local ipairs = ipairs
 local pairs = pairs
@@ -22,6 +22,8 @@ local converters = {
   string = function(v)
              v = sgsub(v,'["\\]','\\%0')
              v = sgsub(v,"\n","\\n")
+             v = sgsub(v,"\r","\\r")
+             v = sgsub(v,"\0","\\000")
              return '"' .. v .. '"'
            end,
   table = function(v)
@@ -31,8 +33,8 @@ local converters = {
              return tostring(v)
            end,
   boolean = function(v)
-           return tostring(v)
-         end  
+              return tostring(v)
+            end
 }
 
 local valtostr = 
@@ -71,7 +73,11 @@ serialize =
 
 unserialize = 
   function(strtab)
-    return loadstring('return '..strtab)()
+    local fn = loadstring('return '..strtab)
+    assert(fn, "unserialize(): loadstring failed")
+    local res = fn()
+    assert(type(res) == "table", "unserialize(): got non-table")
+    return res
   end
 
 return {
