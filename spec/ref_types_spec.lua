@@ -90,9 +90,19 @@ describe("Remote functions", function()
       end
     end)
 
-  it("can be stored and called", function()
+  it("can be referenced", function()
     local rem_print = client.print
+    assert.equal('function', rem_print.__tango_type)
     -- rem_print("Hello, world!")
   end)
 
+  it("can be created and pushed to server",
+    function()
+      local function fn1()
+        return 42
+      end
+      client.fn1 = client.loadstring( string.dump(fn1) )
+      assert.equal('function', client.fn1.__tango_type)
+      assert.equal(42, client.fn1())
+    end)
 end)
