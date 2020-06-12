@@ -14,8 +14,6 @@ local try_require =
   end
 
 return {
-  ref = require('tango.proxy').ref,
-  unref = require('tango.proxy').unref,
   client = {
      socket = try_require('tango.client.socket'),
      zmq = try_require('tango.client.zmq')
