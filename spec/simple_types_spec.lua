@@ -1,5 +1,4 @@
--- TODO: add more backends
-local server_backend = "lgi_async"
+local server_backend = os.getenv("TANGO_SERVER_BACKEND") or "lgi_async"
 local client_backend = "socket"
 local option = nil
 

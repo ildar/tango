@@ -23,7 +23,7 @@ local converters = {
              v = sgsub(v,'["\\]','\\%0')
              v = sgsub(v,"\n","\\n")
              v = sgsub(v,"\r","\\r")
-             v = sgsub(v,"\0","\\000")
+             v = sgsub(v,"%z","\\000")
              return '"' .. v .. '"'
            end,
   table = function(v)
