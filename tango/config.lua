@@ -10,7 +10,7 @@ server_default =
     config.functab = config.functab or globals
     config.serialize = config.serialize or require'tango.utils.serialization'.serialize
     config.unserialize = config.unserialize or require'tango.utils.serialization'.unserialize
-    config.pcall = pcall
+    config.pcall = config.pcall or pcall
     if config.write_access == nil then
       config.write_access = true
     end

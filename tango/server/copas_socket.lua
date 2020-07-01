@@ -16,7 +16,7 @@ module('tango.server.copas_socket')
 new = 
   function(config)
     config = default(config)
-    config.pcall = copcall
+    config.pcall = config.pcall or copcall
     config.interface = config.interface or '*'
     config.port = config.port or 12345
     config.ssl_timeout = config.ssl_timeout or 10

@@ -133,11 +133,10 @@ describe("Tests the client side of Tango module (ro cases)", function()
 
   it("writing remote variable should cause a error",
      function()
-       local ok,err = pcall(
+       assert.has.error(
          function()
            client.data = 33
          end)
-       assert.is_equal( false, ok )
      end)
 end)
 
@@ -151,19 +150,17 @@ describe("Tests the client side of Tango module (wo cases)", function()
     end)
   it("reading remote variable should cause a error",
      function()
-       local ok,err = pcall(
+       assert.has.error(
          function()
            return client.data
          end)
-       assert.is_equal( false, ok )
      end)
 
   it("should successfully write remote variable",
      function()
-       local ok,err = pcall(
+       assert.has_no.error(
          function()
            client.data = 33
          end)
-       assert.is_equal( true, ok )
      end)
 end)
