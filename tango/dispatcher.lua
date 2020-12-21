@@ -48,7 +48,8 @@ local new =
           end
           -- do
           local res
-          if type(obj) == 'function' or
+          if type(obj) == 'cdata' or
+              type(obj) == 'function' or
               type(obj) == 'lightfunction' or
               (type(obj) == 'userdata' and tostring(obj):sub(1,7) == 'lgi.fun')
             then
@@ -77,6 +78,7 @@ local new =
             if type(res[i]) == 'table' or
                 type(res[i]) == 'romtable' or
                 type(res[i]) == 'userdata' or
+                type(res[i]) == 'cdata' or
                 type(res[i]) == 'function' or
                 type(res[i]) == 'lightfunction'
               then
@@ -95,6 +97,7 @@ local new =
       if type(obj) == 'table' or
           type(obj) == 'romtable' or
           type(obj) == 'userdata' or
+          type(obj) == 'cdata' or
           type(obj) == 'function' or
           type(obj) == 'lightfunction'
         then
